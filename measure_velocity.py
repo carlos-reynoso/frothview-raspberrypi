@@ -2,7 +2,8 @@ import cv2
 import numpy as np
 import time
 
-def draw_flow(img, flow, winsize=30, real_time_fps=30, show_fps=False, frame_count=0, start_time=None, prev_avg_velocity=0, alpha=0.1, conv_factor=1.0):
+
+def draw_flow(img, flow, winsize=30, real_time_fps=30, show_fps=False, frame_count=0, start_time=None, prev_avg_velocity=0, alpha=0.1,conv_factor=1.0):
     h, w = img.shape[:2]
     step = max(2, winsize // 2)  # Dynamically set step based on winsize
     y, x = np.mgrid[step/2:h:step, step/2:w:step].reshape(2, -1).astype(np.int16)
@@ -18,8 +19,9 @@ def draw_flow(img, flow, winsize=30, real_time_fps=30, show_fps=False, frame_cou
     lines = np.int16(lines + 0.5)
     
     vis = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    for (x1, y1), (x2, y2) in lines:
-        cv2.line(vis, (x1, y1), (x2, y2), (0, 255, 0), 1)  # Draw lines in green
+    for ((x1, y1), (x2, y2)), velocity in zip(lines, velocities):
+        color=(0,255,0)
+        cv2.line(vis, (x1, y1), (x2, y2), color, 1)
 
     if show_fps and start_time is not None:
         current_fps = frame_count / (time.time() - start_time)
@@ -28,15 +30,22 @@ def draw_flow(img, flow, winsize=30, real_time_fps=30, show_fps=False, frame_cou
 
     return vis, avg_velocity
 
+
+
 def main(show_fps=False, use_roi=True, scale_factor=1.0):
-    # Read conversion factor from conv_factor.txt, if it exists
+    print('Starting')
+
+    #pull the conversion factor from conv_factor.txt if exists
     try:
-        with open('conv_factor.txt', 'r') as file:
-            conv_factor = float(file.read())
-            print(f'Using conversion factor of {conv_factor}')
+        with open('conv_factor.txt', 'r') as f:
+            conv_factor= float(f.read())
+            print(f"Conversion factor found: {conv_factor}")
     except FileNotFoundError:
-        print('Conversion factor not found, using default conversion factor of 1')
-        conv_factor = 1
+        print("No conversion factor found. Using default value of 1.0")
+        conv_factor = 1.0
+
+
+
 
     cap = cv2.VideoCapture(0)
     ret, prev = cap.read()
@@ -46,6 +55,8 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0):
         return
 
     frame_height, frame_width = prev.shape[:2]
+
+    # Calculate the ROI based on scale factor
     w_roi = int(frame_width * scale_factor)
     h_roi = int(frame_height * scale_factor)
     x_roi = (frame_width - w_roi) // 2
@@ -73,15 +84,16 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0):
             roi_frame = frame
 
         gray = cv2.cvtColor(roi_frame, cv2.COLOR_BGR2GRAY)
+
+        # Ensure prev_gray is only set after the first frame is captured
         if frame_count == 0:
             prev_gray = gray
 
-        flow = cv2.calcOpticalFlowFarneback(
-            prev_gray, gray, None, 0.5, 1, winsize, 5, 5, 1.2, 0)
 
+        flow = cv2.calcOpticalFlowFarneback(prev_gray, gray, None, 0.5, 1, winsize, 5, 5, 1.2, 0)
         prev_gray = gray.copy()  # Update prev_gray for the next iteration
 
-        vis, prev_avg_velocity = draw_flow(gray, flow, winsize, real_time_fps, show_fps, frame_count, start_time, prev_avg_velocity, conv_factor)
+        vis, prev_avg_velocity = draw_flow(gray, flow, winsize, real_time_fps, show_fps, frame_count, start_time, prev_avg_velocity,conv_factor)
         cv2.imshow('Optical flow', vis)
 
         frame_count += 1
@@ -89,8 +101,9 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
+
     cap.release()
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main(show_fps=True, use_roi=True, scale_factor=0.5)  # Adjust scale_factor
+    main(show_fps=True, use_roi=True, scale_factor=.5)  # Adjust scale_factor as needed
