@@ -1,38 +1,9 @@
 import cv2
 import numpy as np
 import time
+from helper_functions import draw_flow
 
-
-def draw_flow(img, flow, winsize=30, real_time_fps=30, show_fps=False, frame_count=0, start_time=None, prev_avg_velocity=0, alpha=0.1,conv_factor=1.0):
-    h, w = img.shape[:2]
-    step = max(2, winsize // 2)  # Dynamically set step based on winsize
-    y, x = np.mgrid[step/2:h:step, step/2:w:step].reshape(2, -1).astype(np.int16)
-
-    fx, fy = flow[y, x].T
-    velocities = np.sqrt(fx**2 + fy**2) * real_time_fps * conv_factor
-    current_velocity = np.mean(velocities) if velocities.size > 0 else 0
-
-    # Calculate the Exponential Moving Average for velocity
-    avg_velocity = (current_velocity * alpha) + (prev_avg_velocity * (1 - alpha))
-
-    lines = np.vstack([x, y, x+fx, y+fy]).T.reshape(-1, 2, 2)
-    lines = np.int16(lines + 0.5)
-    
-    vis = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    for ((x1, y1), (x2, y2)), velocity in zip(lines, velocities):
-        color=(0,255,0)
-        cv2.line(vis, (x1, y1), (x2, y2), color, 1)
-
-    if show_fps and start_time is not None:
-        current_fps = frame_count / (time.time() - start_time)
-        cv2.putText(vis, f"FPS: {current_fps:.2f}", (10, 30), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 255))
-        cv2.putText(vis, f"Avg Velocity: {avg_velocity:.2f}", (10, 50), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 255))
-
-    return vis, avg_velocity
-
-
-
-def main(show_fps=False, use_roi=True, scale_factor=1.0):
+def main(show_fps=False, use_roi=True, scale_factor=1.0,skip_rate=1):
     print('Starting')
 
     #pull the conversion factor from conv_factor.txt if exists
@@ -43,9 +14,6 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0):
     except FileNotFoundError:
         print("No conversion factor found. Using default value of 1.0")
         conv_factor = 1.0
-
-
-
 
     cap = cv2.VideoCapture(0)
     ret, prev = cap.read()
@@ -74,6 +42,12 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0):
         if not ret:
             break
 
+        # Skip frames based on skip_rate
+        if frame_count % skip_rate != 0:
+            frame_count += 1
+            continue
+
+
         current_frame_time = time.time()
         real_time_fps = 1 / (current_frame_time - prev_frame_time) if current_frame_time != prev_frame_time else 30
         prev_frame_time = current_frame_time
@@ -82,6 +56,13 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0):
             roi_frame = frame[y_roi:y_roi+h_roi, x_roi:x_roi+w_roi]
         else:
             roi_frame = frame
+            
+        
+        # Apply contrast enhancement on the ROI
+        frame_YUV = cv2.cvtColor(roi_frame, cv2.COLOR_BGR2YUV)
+        frame_YUV[:, :, 0] = cv2.equalizeHist(frame_YUV[:, :, 0])
+        roi_frame = cv2.cvtColor(frame_YUV, cv2.COLOR_YUV2BGR)
+
 
         gray = cv2.cvtColor(roi_frame, cv2.COLOR_BGR2GRAY)
 
@@ -89,11 +70,11 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0):
         if frame_count == 0:
             prev_gray = gray
 
-
-        flow = cv2.calcOpticalFlowFarneback(prev_gray, gray, None, 0.5, 1, winsize, 5, 5, 1.2, 0)
+        flow = cv2.calcOpticalFlowFarneback(prev_gray, gray, None, pyr_scale=0.5, levels=3, winsize=winsize, iterations=5, poly_n=5, poly_sigma=1.2, flags=0)
+    
         prev_gray = gray.copy()  # Update prev_gray for the next iteration
 
-        vis, prev_avg_velocity = draw_flow(gray, flow, winsize, real_time_fps, show_fps, frame_count, start_time, prev_avg_velocity,conv_factor)
+        vis, prev_avg_velocity = draw_flow(gray, flow, winsize, real_time_fps, show_fps, frame_count, start_time, prev_avg_velocity,conv_factor=conv_factor,color_map_on=False)
         cv2.imshow('Optical flow', vis)
 
         frame_count += 1
@@ -106,4 +87,4 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main(show_fps=True, use_roi=True, scale_factor=.5)  # Adjust scale_factor as needed
+    main(show_fps=True, use_roi=True, scale_factor=.5,skip_rate=1)  # Adjust scale_factor as needed
