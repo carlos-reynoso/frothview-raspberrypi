@@ -15,8 +15,9 @@ def main():
     root.geometry(f"{screen_width}x{screen_height}+0+0")
 
     # Define function to execute command in a new terminal
+
     def run_command_in_terminal(command):
-        subprocess.Popen(['x-terminal-emulator', '-e', command])
+        subprocess.Popen(['x-terminal-emulator', '-e', command], close_fds=True)
         root.destroy()
 
     # Define button commands
