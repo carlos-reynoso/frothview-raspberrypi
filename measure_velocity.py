@@ -37,6 +37,8 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0,skip_rate=1):
     prev_avg_velocity = 0
     winsize = 100
 
+    cv2.namedWindow('Optical flow', cv2.WINDOW_NORMAL)
+
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -78,9 +80,10 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0,skip_rate=1):
         cv2.imshow('Optical flow', vis)
 
         frame_count += 1
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        #check if user tried to close
+        if cv2.waitKey(1) & 0xFF == ord('q') or cv2.getWindowProperty('Optical flow', cv2.WND_PROP_VISIBLE) < 1:
             break
+
 
 
     cap.release()

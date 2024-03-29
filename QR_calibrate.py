@@ -25,6 +25,7 @@ def main(use_roi=False,scale_factor=0.5):
 
     # Variable to keep track of QR code detection time
     qr_detected_at = None
+    cv2.namedWindow('QR Calibration', cv2.WINDOW_NORMAL)
 
     while True:
         # Capture frame-by-frame
@@ -75,7 +76,7 @@ def main(use_roi=False,scale_factor=0.5):
             qr_detected_at = None
 
         # Display the frame
-        cv2.imshow('QR Code Detector', roi_frame)
+        cv2.imshow('QR Calibration', roi_frame)
 
         # Check if QR has been in view for more than 5 seconds
         if qr_detected_at is not None and (time.time() - qr_detected_at) > 5:
@@ -84,8 +85,14 @@ def main(use_roi=False,scale_factor=0.5):
             break
 
         # Exit if 'q' is pressed
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        #check if user tried to close
+        if cv2.waitKey(1) & 0xFF == ord('q') or cv2.getWindowProperty('QR Calibration', cv2.WND_PROP_VISIBLE) < 1:
+            qr_detected=False
             break
+
+
+
+
 
     # Release the capture
     cap.release()
@@ -114,4 +121,3 @@ def main(use_roi=False,scale_factor=0.5):
 
 if __name__ == "__main__":
     main(use_roi=True, scale_factor=0.5)
-

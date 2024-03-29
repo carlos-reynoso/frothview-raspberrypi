@@ -1,47 +1,40 @@
 import tkinter as tk
 import os
-from tkinter import font as tkFont
+import subprocess
+import sys
 
-def main_menu():
-    # Create the main window
+def main():
     root = tk.Tk()
     root.title("Main Menu")
 
-    # Make it full screen
-    root.attributes('-fullscreen', True)
+    # Get screen width and height
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
 
-    # Define a large font
-    button_font = tkFont.Font(family='Helvetica', size=24, weight='bold')
+    # Set window size and position to simulate maximized window
+    root.geometry(f"{screen_width}x{screen_height}+0+0")
 
-    # Function to exit the program
-    def quit_program():
-        root.destroy()
+    # Define function to execute command in a new terminal
+    def run_command_in_terminal(command):
+        subprocess.Popen(['x-terminal-emulator', '-e', command])
 
-    # Function to shutdown the system
-    def shutdown_system():
-        os.system("sudo shutdown now")
+    # Define button commands
+    button_commands = {
+        "Measure": lambda: run_command_in_terminal("python measure_velocity.py"),
+        "Calibrate": lambda: os.system("python QR_calibrate.py"),
+        "Shutdown": lambda: os.system("sudo shutdown now"),
+        "Exit": lambda: sys.exit()  # Use sys.exit to quit the application
+    }
 
-    # Frame to contain the buttons, expanded in both directions
-    button_frame = tk.Frame(root)
-    button_frame.pack(expand=True, fill=tk.BOTH)
+    # Button texts
+    button_texts = ["Measure", "Calibrate", "Shutdown", "Exit"]
 
-    # Configure the button_frame to expand and fill space
-    button_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
-    button_frame.grid_rowconfigure(0, weight=1)
-
-    # Create and pack buttons to fill the frame horizontally
-    buttons = [
-        ("Measure", lambda: print("Measure")),
-        ("Calibrate", lambda: print("Calibrate")),
-        ("Update", lambda: print("Update")),
-        ("Shutdown", shutdown_system)
-    ]
-
-    for i, (text, command) in enumerate(buttons):
-        button = tk.Button(button_frame, text=text, font=button_font, command=command)
-        button.grid(row=0, column=i, sticky='nsew', padx=20, pady=200)
+    # Create and pack buttons
+    for text in button_texts:
+        command = button_commands.get(text, lambda: None)
+        tk.Button(root, text=text, command=command).pack(side=tk.LEFT, padx=10, pady=10)
 
     root.mainloop()
 
 if __name__ == "__main__":
-    main_menu()
+    main()
