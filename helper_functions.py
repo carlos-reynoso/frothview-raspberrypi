@@ -60,10 +60,7 @@ def draw_flow(img, flow, winsize=30, real_time_fps=30, show_fps=False, frame_cou
     velocities = np.hypot(fx, fy) * real_time_fps * conv_factor
 
     # Compute the average velocity across all sampled points for a general sense of motion.
-    current_velocity = np.mean(velocities) if velocities.size > 0 else 0
-
-    # Calculate the Exponential Moving Average of the velocity to smooth fluctuations over time.
-    avg_velocity = (current_velocity * alpha) + (prev_avg_velocity * (1 - alpha))
+    avg_velocity = np.mean(velocities) if velocities.size > 0 else 0
 
     # Create an array of line segments to represent the flow. Each line starts at (x, y) and
     # ends at (x + fx, y + fy), indicating the direction and magnitude of flow.
