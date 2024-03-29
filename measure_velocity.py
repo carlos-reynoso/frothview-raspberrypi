@@ -101,11 +101,7 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0, skip_rate=1, buffer_siz
 
     cap.release()
     cv2.destroyAllWindows()
-    open_main_menu()
 
-def open_main_menu():
-    subprocess.Popen(['python', 'menu.py'])
-    sys.exit()
 
 if __name__ == "__main__":
     main(show_fps=True, use_roi=True, scale_factor=.5, skip_rate=1)  # Adjust scale_factor as needed
