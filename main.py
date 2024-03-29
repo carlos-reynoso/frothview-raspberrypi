@@ -15,7 +15,8 @@ def main():
     root.geometry(f"{screen_width}x{screen_height}+0+0")
 
     # Make the window full screen
-    root.attributes("-fullscreen", True)
+    #root.attributes("-fullscreen", True)
+
 
     # Define function to execute command in a new terminal
     def run_command_in_terminal(command):
