@@ -120,7 +120,7 @@ def get_numeric_input(title, prompt):
     for (text, row, col) in buttons:
         action = lambda x=text: on_button_press(x)
         btn = tk.Button(keypad, text=text, command=action, font=("Helvetica", 20))
-        btn.grid(row=row, column=col, sticky='nsew', padx=20, pady=20)
+        btn.grid(row=row, column=col, sticky='nsew', padx=5, pady=5)
         keypad.grid_rowconfigure(row, weight=1)
         keypad.grid_columnconfigure(col, weight=1)
 
