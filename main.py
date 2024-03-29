@@ -14,8 +14,10 @@ def main():
     # Set window size and position to simulate maximized window
     root.geometry(f"{screen_width}x{screen_height}+0+0")
 
-    # Define function to execute command in a new terminal
+    # Make the window full screen
+    root.attributes("-fullscreen", True)
 
+    # Define function to execute command in a new terminal
     def run_command_in_terminal(command):
         subprocess.Popen(['x-terminal-emulator', '-e', command]).detach()
         root.destroy()
@@ -31,10 +33,15 @@ def main():
     # Button texts
     button_texts = ["Measure", "Calibrate", "Shutdown", "Exit"]
 
-    # Create and pack buttons
+    # Create a frame for the buttons
+    button_frame = tk.Frame(root)
+    button_frame.pack(expand=True, fill=tk.BOTH, padx=10, pady=10)  # Add padding
+
+    # Create and pack buttons within the frame
     for text in button_texts:
         command = button_commands.get(text, lambda: None)
-        tk.Button(root, text=text, command=command).pack(side=tk.LEFT, padx=10, pady=10)
+        btn = tk.Button(button_frame, text=text, command=command)
+        btn.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)  # Add padding
 
     root.mainloop()
 

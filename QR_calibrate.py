@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import time
 from helper_functions import get_numeric_input
+import subprocess
+import sys
 
 qr_detected=False
 
@@ -116,7 +118,11 @@ def main(use_roi=False,scale_factor=0.5):
 
         print("Conversion factor (cm/pxl) saved to conv_factor.txt")
 
+    open_main_menu()
 
+def open_main_menu():
+    subprocess.Popen(['python', 'main.py'])
+    sys.exit()
         
 
 if __name__ == "__main__":

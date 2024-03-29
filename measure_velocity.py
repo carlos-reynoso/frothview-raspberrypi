@@ -95,7 +95,7 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0,skip_rate=1):
     open_main_menu()
 
 def open_main_menu():
-    subprocess.Popen(['python', 'main_menu.py'])
+    subprocess.Popen(['python', 'menu.py'])
     sys.exit()
 
 
