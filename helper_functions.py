@@ -4,6 +4,8 @@ import time
 import tkinter as tk
 import subprocess
 import json
+import os
+import glob
 
 def color_map(velocity, max_velocity):
     normalized_velocity = min(velocity / max_velocity, 1)
@@ -152,3 +154,15 @@ def find_usb_mount_path():
         return None
 
 
+
+def get_unique_filename(directory, base_name, extension):
+    file_list = glob.glob(os.path.join(directory, f"{base_name}*{extension}"))
+    if not file_list:
+        return f"{base_name}{extension}"
+    else:
+        max_num = 0
+        for file in file_list:
+            parts = os.path.splitext(file)[0].split('_')
+            if len(parts) > 1 and parts[-1].isdigit():
+                max_num = max(max_num, int(parts[-1]))
+        return f"{base_name}_{max_num + 1}{extension}"

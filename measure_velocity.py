@@ -1,9 +1,7 @@
 import cv2
-import numpy as np
 import time
-from helper_functions import draw_flow, find_usb_mount_path
-import subprocess
-import sys
+from helper_functions import draw_flow, find_usb_mount_path, get_unique_filename
+import os
 import csv
 
 def main(show_fps=False, use_roi=True, scale_factor=1.0, skip_rate=1, buffer_size=50):
@@ -40,7 +38,17 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0, skip_rate=1, buffer_siz
     cv2.namedWindow('Optical flow', cv2.WINDOW_NORMAL)
 
     usb_mount_path = find_usb_mount_path()
-    file_path = f"{usb_mount_path}/output_data.csv"
+    #check if there is a file starting wirh 'output_data' in the usb_mount_path directory, if so add a number to the end of the file name
+
+    usb_mount_path = find_usb_mount_path()
+    if usb_mount_path is None:
+        print("No USB drive found.")
+        return
+
+    file_name = get_unique_filename(usb_mount_path, "output_data", ".csv")
+
+    file_name = get_unique_filename(usb_mount_path, "output_data", ".csv")
+    file_path = os.path.join(usb_mount_path, file_name)
 
     print(f"Saving data to: {file_path}")
 
