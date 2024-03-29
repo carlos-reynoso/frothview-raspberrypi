@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import time
+from helper_functions import get_numeric_input
 
 qr_detected=False
 
@@ -89,7 +90,9 @@ def main(use_roi=False,scale_factor=0.5):
     cv2.destroyAllWindows()
 
     if qr_detected:
-        input1 = input("Please enter the QR size in cm: ")
+        input1 = get_numeric_input("Numeric Input", "Please enter the QR size in cm:")
+        print("QR size entered: ", input1)
+
 
         try:
             input1 = float(input1)

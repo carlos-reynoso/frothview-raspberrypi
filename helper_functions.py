@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import time
+import tkinter as tk
 
 def color_map(velocity, max_velocity):
     normalized_velocity = min(velocity / max_velocity, 1)
@@ -83,3 +84,51 @@ def draw_flow(img, flow, winsize=30, real_time_fps=30, show_fps=False, frame_cou
 
     # Return the final image with optical flow vectors drawn and the current average velocity.
     return vis, avg_velocity
+
+
+# Define a function to create a numeric keypad instead of using the simpledialog
+def get_numeric_input(title, prompt):
+    def on_button_press(value):
+        if value == 'Enter':
+            user_input.set(entry.get())  # Set the user_input variable with the entry value
+            keypad.destroy()
+        elif value == 'Clear':
+            entry.delete(0, tk.END)
+        else:
+            entry.insert(tk.END, value)  # Insert the button's value at the end of the text entry
+
+    keypad = tk.Tk()
+    keypad.title(title)
+    keypad.attributes('-fullscreen', True)  # Make the window full screen
+    
+    # Variable to store user input
+    user_input = tk.StringVar(keypad)
+    
+    tk.Label(keypad, text=prompt, font=("Helvetica", 20)).grid(row=0, column=0, columnspan=3)
+    
+    entry = tk.Entry(keypad, textvariable=user_input, justify='right', font=("Helvetica", 20))
+    entry.grid(row=1, column=0, columnspan=3, sticky="nsew", padx=20, pady=20)
+    
+    # Numeric Buttons
+    buttons = [
+        ('1', 2, 0), ('2', 2, 1), ('3', 2, 2),
+        ('4', 3, 0), ('5', 3, 1), ('6', 3, 2),
+        ('7', 4, 0), ('8', 4, 1), ('9', 4, 2),
+        ('Clear', 5, 0), ('0', 5, 1), ('Enter', 5, 2),
+    ]
+    
+    for (text, row, col) in buttons:
+        action = lambda x=text: on_button_press(x)
+        btn = tk.Button(keypad, text=text, command=action, font=("Helvetica", 20))
+        btn.grid(row=row, column=col, sticky='nsew', padx=20, pady=20)
+        keypad.grid_rowconfigure(row, weight=1)
+        keypad.grid_columnconfigure(col, weight=1)
+
+    # Adjust the row and column weights so they expand to fill the screen
+    for i in range(1, 6):
+        keypad.grid_rowconfigure(i, weight=1)
+    for i in range(3):
+        keypad.grid_columnconfigure(i, weight=1)
+
+    keypad.mainloop()
+    return user_input.get()  # Return the value when the window is closed
