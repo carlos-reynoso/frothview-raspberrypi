@@ -17,7 +17,7 @@ def main():
     # Define function to execute command in a new terminal
 
     def run_command_in_terminal(command):
-        subprocess.Popen(['x-terminal-emulator', '-e', command], close_fds=True)
+        subprocess.Popen(['x-terminal-emulator', '-e', command]).detach()
         root.destroy()
 
     # Define button commands
