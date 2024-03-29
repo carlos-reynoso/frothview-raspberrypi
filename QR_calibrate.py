@@ -12,6 +12,8 @@ def main(use_roi=False,scale_factor=0.5):
     cap = cv2.VideoCapture(0)
     ret, frame = cap.read()
 
+
+
     frame_height, frame_width = frame.shape[:2]
     w_roi = int(frame_width * scale_factor)
     h_roi = int(frame_height * scale_factor)
