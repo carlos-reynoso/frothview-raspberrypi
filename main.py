@@ -17,11 +17,12 @@ def main():
     # Define function to execute command in a new terminal
     def run_command_in_terminal(command):
         subprocess.Popen(['x-terminal-emulator', '-e', command])
+        root.destroy()
 
     # Define button commands
     button_commands = {
         "Measure": lambda: run_command_in_terminal("python measure_velocity.py"),
-        "Calibrate": lambda: os.system("python QR_calibrate.py"),
+        "Calibrate": lambda: run_command_in_terminal("python QR_calibrate.py"),
         "Shutdown": lambda: os.system("sudo shutdown now"),
         "Exit": lambda: sys.exit()  # Use sys.exit to quit the application
     }

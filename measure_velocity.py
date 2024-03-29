@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import time
 from helper_functions import draw_flow
+import subprocess
+import sys
 
 def main(show_fps=False, use_roi=True, scale_factor=1.0,skip_rate=1):
     print('Starting')
@@ -88,6 +90,14 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0,skip_rate=1):
 
     cap.release()
     cv2.destroyAllWindows()
+
+    # Open the main menu again
+    open_main_menu()
+
+def open_main_menu():
+    subprocess.Popen(['python', 'main_menu.py'])
+    sys.exit()
+
 
 if __name__ == "__main__":
     main(show_fps=True, use_roi=True, scale_factor=.5,skip_rate=1)  # Adjust scale_factor as needed
