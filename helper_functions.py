@@ -2,6 +2,8 @@ import numpy as np
 import cv2
 import time
 import tkinter as tk
+import subprocess
+import json
 
 def color_map(velocity, max_velocity):
     normalized_velocity = min(velocity / max_velocity, 1)
@@ -132,3 +134,24 @@ def get_numeric_input(title, prompt):
 
     keypad.mainloop()
     return user_input.get()  # Return the value when the window is closed
+
+
+
+def find_usb_mount_path():
+    try:
+        result = subprocess.run(['lsblk', '-o', 'NAME,MOUNTPOINT', '-J'], capture_output=True, text=True)
+        output = result.stdout
+
+        if output:
+            data = json.loads(output)
+            for device in data.get('blockdevices', []):
+                if device.get('children'):
+                    for child in device['children']:
+                        if child.get('mountpoint'):
+                            return child['mountpoint']
+        return None
+    except Exception as e:
+        print(f"Error finding USB mount point: {e}")
+        return None
+
+

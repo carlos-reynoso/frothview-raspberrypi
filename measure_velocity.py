@@ -1,12 +1,12 @@
 import cv2
 import numpy as np
 import time
-from helper_functions import draw_flow
+from helper_functions import draw_flow, find_usb_mount_path
 import subprocess
 import sys
 import csv
 
-def main(show_fps=False, use_roi=True, scale_factor=1.0, skip_rate=1, buffer_size=10):
+def main(show_fps=False, use_roi=True, scale_factor=1.0, skip_rate=1, buffer_size=50):
     print('Starting')
 
     # Try to pull the conversion factor from 'conv_factor.txt'
@@ -39,8 +39,13 @@ def main(show_fps=False, use_roi=True, scale_factor=1.0, skip_rate=1, buffer_siz
 
     cv2.namedWindow('Optical flow', cv2.WINDOW_NORMAL)
 
+    usb_mount_path = find_usb_mount_path()
+    file_path = f"{usb_mount_path}/output_data.csv"
+
+    print(f"Saving data to: {file_path}")
+
     # Initialize CSV file for writing data
-    with open('output_data.csv', 'w', newline='') as file:
+    with open(file_path, 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["Frame", "Data"])  # Header row
         buffer = []  # Initialize a buffer
